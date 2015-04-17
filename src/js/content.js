@@ -214,14 +214,14 @@
     anchors[index].style.display = anchorDisplayStyle;
 
     // imgDetal
-    imgDetail.className = "anchor-detail";
-    imgDetail.style.top = 0;
-    imgDetail.style.left = imgs[index].width + 7 + "px";
+    // imgDetail.className = "anchor-detail";
+    // imgDetail.style.top = 0;
+    // imgDetail.style.left = imgs[index].width + 7 + "px";
 
-    // // closeBtn
-    closeBtn.className = "close";
-    closeBtn.style.left = imgs[index].width + 120 + "px";
-    closeBtn.innerHTML = "✕";
+    // // // closeBtn
+    // closeBtn.className = "close";
+    // closeBtn.style.left = imgs[index].width + 120 + "px";
+    // closeBtn.innerHTML = "✕";
 
 
     // // attrWidth
