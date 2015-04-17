@@ -1,0 +1,1 @@
+{"name":"Check href='#'","description":"This is tool of checking 'href' attribute.","version":"1.0.0","manifest_version":2,"icons":{"16":"icon/icon16.png","48":"icon/icon48.png","128":"icon/icon128.png"},"background":{"scripts":["contentscript.js"]},"permissions":["tabs","http://*/*"],"browser_action":{"name":"Click to check images","default_icon":"icon/icon16.png"}}
