@@ -25,10 +25,11 @@
       focusIndex = 0,
       tempDiv = document.createElement("div"),
       tempP = document.createElement("p"),
-      tempImg = document.createElement("img"),
+      tempAnchor = document.createElement("span"),
       tempSpan = document.createElement("span"),
       enableDrag = true,
-      hrefRegExp = /^(#|＃).*/;
+      hrefRegExp = /^(#|＃).*/,
+      timer;
       
   // =======================================
   // functions
@@ -49,14 +50,18 @@
   };
 
   var onWindowResize = function(){
-    if( $modalBg || $anchorContainer ){
-      $body.removeChild( $modalBg );
-      $body.removeChild( $anchorContainer );
-      focusIndex = 0;
-    }
-    anchors = document.getElementsByTagName("a");
-    anchorsLen = anchors.length;
-    setImgChecker();
+    clearTimeout(timer);
+    timer = setTimeout(function(){
+      if( $modalBg || $anchorContainer ){
+        $body.removeChild( $modalBg );
+        $body.removeChild( $anchorContainer );
+        focusIndex = 0;
+      }
+      anchors = document.getElementsByTagName("a");
+      anchorsLen = anchors.length;
+      setHrefChecker();
+    }, 500);
+    
   };
 
   var setHrefChecker = function(){
@@ -118,13 +123,13 @@
     event.preventDefault();
 
     var hitArea = event.currentTarget.querySelector(".hitArea"),
-        overlayImage = event.currentTarget.querySelector(".overlayImage"),
-        imgDetail = event.currentTarget.querySelector(".anchor-detail");
+        anchorDetail = event.currentTarget.querySelector(".anchor-detail"),
+        anchorHref = event.currentTarget.querySelector(".anchor-href");
 
     // enableDrag = true;
 
-    hitArea.style.width = overlayImage.offsetWidth + imgDetail.offsetWidth + 7 + "px";
-    hitArea.style.height = (overlayImage.offsetHeight > imgDetail.offsetHeight ? overlayImage.offsetHeight : imgDetail.offsetHeight) + "px";
+    hitArea.style.width = anchorDetail.offsetWidth + anchorHref.offsetWidth + 7 + "px";
+    hitArea.style.height = (anchorDetail.offsetHeight > anchorHref.offsetHeight ? anchorDetail.offsetHeight : anchorHref.offsetHeight) + "px";
   };
 
   var onMouseOut = function(event){
@@ -178,10 +183,9 @@
   var createChecker = function( index ){
     var fragment = document.createDocumentFragment(),
         div = tempDiv.cloneNode(),
-        imgDetail = tempDiv.cloneNode(),
+        anchorDetail = tempDiv.cloneNode(),
         closeBtn = tempSpan.cloneNode(),
-        txt = "",
-        anchorEle = tempImg.cloneNode(),
+        anchorEle = tempAnchor.cloneNode(),
         hitArea = tempDiv.cloneNode(),
         attrWidth,
         attrHeight,
@@ -190,90 +194,64 @@
         anchorHref = anchors[index].getAttribute("href"),
         rect;
 
-    if( anchorDisplayStyle !== "block" || anchorDisplayStyle !== "inline-block" ){
+    if( anchorDisplayStyle !== "block" && anchorDisplayStyle !== "inline-block" ){
       anchors[index].style.display = "inline-block";
     }
 
     rect = anchors[index].getBoundingClientRect();
 
     // div
-    console.log( hrefRegExp.test(anchorHref) );
     if( hrefRegExp.test(anchorHref) || anchorHref === "" ){
       div.className = "anchor-container notice";
     } else {
       div.className = "anchor-container";
     }
     div.style.position = "absolute";
-    div.style.width = rect.width + "px";
-    div.style.height = rect.height + "px";
-    div.style.display = "inline-block";
     div.style.top = rect.top + window.pageYOffset + "px";
     div.style.left = rect.left + window.pageXOffset + "px";
-    div.innerHTML = anchors[index].innerHTML;
+
+
+
+    // anchorDetail
+    anchorDetail.className = "anchor-href";
+    anchorDetail.style.top = 0;
+    anchorDetail.style.left = (rect.width === 0? 13 : rect.width) + 7 + "px";
+    anchorDetail.innerHTML = anchorHref;
+
+    // anchorEle
+    anchorEle.className = "anchor-detail";
+    anchorEle.style.width = (rect.width === 0? 13 : rect.width) + "px";
+    anchorEle.style.height = (rect.height === 0? 13 : rect.height) + "px";
+    anchorEle.innerHTML = anchors[index].innerHTML;
+
+    // closeBtn
+    closeBtn.className = "close";
+    closeBtn.style.left = (rect.width === 0? 13 : rect.width) + 120 + "px";
+    closeBtn.innerHTML = "✕";
+
+    hitArea.className = "hitArea";
+
+    div.addEventListener("mousedown", onMouseDown, false);
+    div.addEventListener("mouseup", onMouseUp, false);
+    div.addEventListener("mouseover", onMouseEnter, false);
+    div.addEventListener("mouseout", onMouseOut, false);
+
+    // alt.addEventListener("mouseover", onAltMouseEnter, false);
+    // alt.addEventListener("mouseleave", onAltMouseLeave, false);
+
+    closeBtn.addEventListener("click", onCloseClick(div), false);
+    closeBtn.addEventListener("mouseover", onCloseOver(div), false);
+    closeBtn.addEventListener("mouseout", onCloseOut(div), false);
+
+    fragment.appendChild(anchorEle);
+    fragment.appendChild(anchorDetail);
+    fragment.appendChild(hitArea);
+    fragment.appendChild(closeBtn);
+
+    div.appendChild( fragment );
 
     anchors[index].style.display = anchorDisplayStyle;
 
-    // imgDetal
-    // imgDetail.className = "anchor-detail";
-    // imgDetail.style.top = 0;
-    // imgDetail.style.left = imgs[index].width + 7 + "px";
-
-    // // // closeBtn
-    // closeBtn.className = "close";
-    // closeBtn.style.left = imgs[index].width + 120 + "px";
-    // closeBtn.innerHTML = "✕";
-
-
-    // // attrWidth
-    // attrWidth = imgs[index].getAttribute("width");
-    // attrWidth = /^[0-9]+\%$/.test(attrWidth)? attrWidth : parseInt(attrWidth, 10);
-
-    // // attrHeight
-    // attrHeight = imgs[index].getAttribute("height");
-    // attrHeight = /^[0-9]+\%$/.test(attrHeight)? attrHeight : parseInt(attrHeight, 10);
-
-    // // txt
-    // txt += attrWidth !== imgs[index].naturalWidth ? '<p class="width-size defference">[width] : ' : '<p class="width-size">[width] : ';
-    // txt += attrWidth + '<br>(<strong>original:' + imgs[index].naturalWidth + '</strong>)</p>';
-    // txt += attrHeight !== imgs[index].naturalHeight ? '<p class="height-size defference">[height] : ' : '<p class="height-size">[height] : ';
-    // txt += attrHeight + '<br>(<strong>original:' + imgs[index].naturalHeight + '</strong>)</p>';
-    // txt += '<p class="alt">[alt]<br>' + imgs[index].alt + '</p>';
-
-    // // alt.className = "alt";
-    // // alt.innerHTML = '[alt]<br>' + imgs[index].alt;
-
-    // if(attrWidth !== imgs[index].naturalWidth || attrHeight !== imgs[index].naturalHeight){
-    //   div.className += " caution";
-    // }
-
-    // imgDetail.innerHTML = txt;
-    // // imgDetail.appendChild(alt);
-
-    // img.src = imgs[index].src;
-    // img.width = imgs[index].width;
-    // img.height = imgs[index].height;
-    // img.className = "overlayImage";
-
-    // hitArea.className = "hitArea";
-
-    // div.addEventListener("mousedown", onMouseDown, false);
-    // div.addEventListener("mouseup", onMouseUp, false);
-    // div.addEventListener("mouseover", onMouseEnter, false);
-    // div.addEventListener("mouseout", onMouseOut, false);
-
-    // // alt.addEventListener("mouseover", onAltMouseEnter, false);
-    // // alt.addEventListener("mouseleave", onAltMouseLeave, false);
-
-    // closeBtn.addEventListener("click", onCloseClick(div), false);
-    // closeBtn.addEventListener("mouseover", onCloseOver(div), false);
-    // closeBtn.addEventListener("mouseout", onCloseOut(div), false);
-
-    // fragment.appendChild(img);
-    // fragment.appendChild(imgDetail);
-    // fragment.appendChild(hitArea);
-    // fragment.appendChild(closeBtn);
-
-    div.appendChild( fragment );
 
     return div;
   };
