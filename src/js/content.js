@@ -28,7 +28,7 @@
       tempAnchor = document.createElement("span"),
       tempSpan = document.createElement("span"),
       enableDrag = true,
-      hrefRegExp = /^(#|＃).*/,
+      hrefRegExp = /(^(#|＃).*)|\s|　/,
       timer;
       
   // =======================================
@@ -201,7 +201,7 @@
     rect = anchors[index].getBoundingClientRect();
 
     // div
-    if( hrefRegExp.test(anchorHref) || anchorHref === "" ){
+    if( hrefRegExp.test(anchorHref) || anchorHref === "" || !!!anchorHref ){
       div.className = "anchor-container notice";
     } else {
       div.className = "anchor-container";
